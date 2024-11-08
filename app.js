@@ -1,3 +1,5 @@
+require('dotenv').config({ path: './backend.env' }); // Load environment variables
+
 const express = require('express');
 const app = express();
 const morgan = require('morgan');
@@ -6,22 +8,24 @@ const mongoose = require('mongoose');
 
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
-const req = require('express/lib/request');
 const userRoutes = require('./api/routes/user');
 
 mongoose.connect(
     `mongodb+srv://kbalaji6:${process.env.MONGO_ATLAS_PW}@node-rest-shop.g3rlz.mongodb.net/?retryWrites=true&w=majority`
-).then(() => {
+)
+.then(() => {
     console.log('Connected to MongoDB');
-}).catch(err => {
+})
+.catch(err => {
     console.error('MongoDB connection failed:', err);
 });
+
 
 mongoose.Promise = global.Promise;
 
 app.use(morgan('dev'));
 app.use('/uploads', express.static('uploads'));
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
