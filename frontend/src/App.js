@@ -4,11 +4,22 @@ import ProductList from './components/ProductList';
 import CartModal from './components/CartModal';
 import CheckoutPage from './pages/CheckoutPage';
 import ConfirmationPage from './pages/ConfirmationPage';
-import { AppBar, Toolbar, Typography, IconButton, Badge } from '@mui/material';
+import SignupPage from './pages/SignupPage';
+import LoginPage from './pages/LoginPage';
+import ProfilePage from './pages/ProfilePage';
+import { AppBar, Toolbar, Typography, IconButton, Badge, Button } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+// Add this inside the <Routes> component
+
+
+
+// Inside the Routes component in App.js
+
+
 
 function App() {
     const [cartItems, setCartItems] = useState(() => {
@@ -18,6 +29,7 @@ function App() {
     const [cartOpen, setCartOpen] = useState(false);
     const [animateCart, setAnimateCart] = useState(false);
 
+    // Save cart items to localStorage on change
     useEffect(() => {
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
     }, [cartItems]);
@@ -84,26 +96,39 @@ function App() {
         setCartOpen(!cartOpen);
     };
 
+    const clearCart = () => {
+        setCartItems([]);
+        localStorage.removeItem('cartItems');
+        toast.success("Checkout successful! Cart cleared.");
+    };
+
     return (
         <Router>
             <div className="App">
-                <AppBar position="static">
-                    <Toolbar>
-                        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} align="center">
-                            My Store
-                        </Typography>
-                        <IconButton color="inherit" onClick={toggleCart}>
-                            <Badge badgeContent={cartItems.reduce((sum, item) => sum + item.quantity, 0)} color="secondary">
-                                <ShoppingCartIcon className={animateCart ? "cart-animated" : ""} />
-                            </Badge>
-                        </IconButton>
-                    </Toolbar>
-                </AppBar>
+            <AppBar position="static">
+    <Toolbar>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} align="center">
+            My Store
+        </Typography>
+        <Button color="inherit" component={Link} to="/profile">
+            Profile
+        </Button>
+        <IconButton color="inherit" onClick={toggleCart}>
+            <Badge badgeContent={cartItems.reduce((sum, item) => sum + item.quantity, 0)} color="secondary">
+                <ShoppingCartIcon className={animateCart ? "cart-animated" : ""} />
+            </Badge>
+        </IconButton>
+    </Toolbar>
+</AppBar>
 
                 <Routes>
                     <Route path="/" element={<ProductList addToCart={addToCart} />} />
-                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/checkout" element={<CheckoutPage clearCart={clearCart} />} />
                     <Route path="/confirmation" element={<ConfirmationPage />} />
+<Route path="/signup" element={<SignupPage />} />
+<Route path="/login" element={<LoginPage />} />
+<Route path="/profile" element={<ProfilePage />} />
+
                 </Routes>
 
                 <CartModal 
@@ -115,7 +140,6 @@ function App() {
                     decrementQuantity={decrementQuantity} 
                 />
 
-                {/* ToastContainer for displaying notifications */}
                 <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} closeOnClick pauseOnHover draggable />
             </div>
         </Router>

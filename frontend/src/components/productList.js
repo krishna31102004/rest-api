@@ -113,40 +113,41 @@ function ProductList({ addToCart }) {
             </FormControl>
 
             {/* Product List */}
-            <List>
-                {filteredProducts.map((product) => (
-                    <ListItem key={product._id} divider>
-                        <ListItemAvatar>
-                            <Avatar
-                                variant="square"
-                                src="https://via.placeholder.com/150"
-                                alt={product.name}
-                            />
-                        </ListItemAvatar>
-                        <ListItemText
-                            primary={product.name}
-                            secondary={`Price: ${product.price ? `$${product.price}` : 'N/A'}`}
-                        />
-                        <TextField
-                            type="number"
-                            value={quantities[product._id] || 1}
-                            onChange={(e) => handleQuantityChange(product._id, e.target.value)}
-                            label="Quantity"
-                            InputProps={{ inputProps: { min: 1 } }}
-                            style={{ width: '60px', marginRight: '10px' }}
-                        />
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<ShoppingCartIcon />}
-                            onClick={() => handleAddToCart(product)}
-                            disabled={addedToCart[product._id]}
-                        >
-                            {addedToCart[product._id] ? "Added!" : "Add to Cart"}
-                        </Button>
-                    </ListItem>
-                ))}
-            </List>
+<List>
+    {filteredProducts.map((product) => (
+        <ListItem key={product._id} divider>
+            <ListItemAvatar>
+                <Avatar
+                    variant="square"
+                    src={product.productImage ? `http://localhost:3000/${product.productImage}` : "https://via.placeholder.com/150"}
+                    alt={product.name}
+                />
+            </ListItemAvatar>
+            <ListItemText
+                primary={product.name}
+                secondary={`Price: ${product.price ? `$${product.price}` : 'N/A'}`}
+            />
+            <TextField
+                type="number"
+                value={quantities[product._id] || 1}
+                onChange={(e) => handleQuantityChange(product._id, e.target.value)}
+                label="Quantity" // Set label to "Quantity"
+                InputProps={{ inputProps: { min: 1 } }}
+                style={{ width: '60px', marginRight: '10px' }}
+            />
+            <Button
+                variant="contained"
+                color="primary"
+                startIcon={<ShoppingCartIcon />}
+                onClick={() => handleAddToCart(product)}
+                disabled={addedToCart[product._id]}
+            >
+                {addedToCart[product._id] ? "Added!" : "Add to Cart"}
+            </Button>
+        </ListItem>
+    ))}
+</List>
+
         </Container>
     );
 }

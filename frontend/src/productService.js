@@ -1,5 +1,10 @@
 // productService.js
 import api from './api.js';
+// src/productService.js
+
+// Use getProfile and updatePassword directly where needed
+// If these functions aren't needed in productService.js, you can remove the import entirely
+
 
 // Function to get all products
 export const getProducts = async () => {

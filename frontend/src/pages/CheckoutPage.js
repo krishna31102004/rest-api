@@ -4,7 +4,7 @@ import { Box, Typography, Button, List, ListItem, ListItemText } from '@mui/mate
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-function CheckoutPage() {
+function CheckoutPage({ clearCart }) {
     const [cartItems, setCartItems] = useState([]);
     const navigate = useNavigate();
 
@@ -17,8 +17,7 @@ function CheckoutPage() {
     }, []);
 
     const handlePayment = () => {
-        // Clear cart from local storage after payment
-        localStorage.removeItem('cartItems');
+        clearCart(); // Clear the cart
         toast.success("Payment successful! Thank you for your purchase."); // Success notification
         navigate('/confirmation'); // Redirect to Order Confirmation page
     };
