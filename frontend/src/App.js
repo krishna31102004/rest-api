@@ -7,21 +7,17 @@ import ConfirmationPage from './pages/ConfirmationPage';
 import { AppBar, Toolbar, Typography, IconButton, Badge } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
-    const [cartItems, setCartItems] = useState([]);
+    const [cartItems, setCartItems] = useState(() => {
+        const storedCartItems = localStorage.getItem('cartItems');
+        return storedCartItems ? JSON.parse(storedCartItems) : [];
+    });
     const [cartOpen, setCartOpen] = useState(false);
     const [animateCart, setAnimateCart] = useState(false);
 
-    // Load cart items from local storage on component mount
-    useEffect(() => {
-        const storedCartItems = localStorage.getItem('cartItems');
-        if (storedCartItems) {
-            setCartItems(JSON.parse(storedCartItems));
-        }
-    }, []);
-
-    // Save cart items to local storage whenever cartItems changes
     useEffect(() => {
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
     }, [cartItems]);
@@ -30,15 +26,16 @@ function App() {
         setCartItems((prevItems) => {
             const existingItem = prevItems.find((item) => item._id === product._id);
             if (existingItem) {
+                toast.info(`Increased quantity for ${product.name}`);
                 return prevItems.map((item) =>
                     item._id === product._id ? { ...item, quantity: item.quantity + quantity } : item
                 );
             } else {
+                toast.success(`${product.name} added to cart`);
                 return [...prevItems, { ...product, quantity }];
             }
         });
 
-        // Trigger cart animation
         setAnimateCart(true);
         setTimeout(() => setAnimateCart(false), 500);
     };
@@ -47,13 +44,40 @@ function App() {
         setCartItems((prevItems) => {
             const item = prevItems.find((item) => item._id === productId);
             if (item.quantity > 1) {
+                toast.info(`Decreased quantity for ${item.name}`);
                 return prevItems.map((item) =>
                     item._id === productId ? { ...item, quantity: item.quantity - 1 } : item
                 );
             } else {
+                toast.error(`${item.name} removed from cart`);
                 return prevItems.filter((item) => item._id !== productId);
             }
         });
+    };
+
+    const incrementQuantity = (productId) => {
+        setCartItems((prevItems) =>
+            prevItems.map((item) =>
+                item._id === productId ? { ...item, quantity: item.quantity + 1 } : item
+            )
+        );
+        const item = cartItems.find((item) => item._id === productId);
+        if (item) toast.info(`Increased quantity for ${item.name}`);
+    };
+
+    const decrementQuantity = (productId) => {
+        setCartItems((prevItems) =>
+            prevItems
+                .map((item) =>
+                    item._id === productId && item.quantity > 1
+                        ? { ...item, quantity: item.quantity - 1 }
+                        : item
+                )
+                .filter((item) => item.quantity > 0)
+        );
+        const item = cartItems.find((item) => item._id === productId);
+        if (item && item.quantity > 1) toast.info(`Decreased quantity for ${item.name}`);
+        if (item && item.quantity === 1) toast.error(`${item.name} removed from cart`);
     };
 
     const toggleCart = () => {
@@ -82,7 +106,17 @@ function App() {
                     <Route path="/confirmation" element={<ConfirmationPage />} />
                 </Routes>
 
-                <CartModal open={cartOpen} onClose={toggleCart} cartItems={cartItems} removeFromCart={removeFromCart} />
+                <CartModal 
+                    open={cartOpen} 
+                    onClose={toggleCart} 
+                    cartItems={cartItems} 
+                    removeFromCart={removeFromCart} 
+                    incrementQuantity={incrementQuantity} 
+                    decrementQuantity={decrementQuantity} 
+                />
+
+                {/* ToastContainer for displaying notifications */}
+                <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} closeOnClick pauseOnHover draggable />
             </div>
         </Router>
     );

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Button, List, ListItem, ListItemText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function CheckoutPage() {
     const [cartItems, setCartItems] = useState([]);
@@ -18,7 +19,7 @@ function CheckoutPage() {
     const handlePayment = () => {
         // Clear cart from local storage after payment
         localStorage.removeItem('cartItems');
-        alert('Payment successful! Thank you for your purchase.');
+        toast.success("Payment successful! Thank you for your purchase."); // Success notification
         navigate('/confirmation'); // Redirect to Order Confirmation page
     };
 

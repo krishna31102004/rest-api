@@ -5,18 +5,20 @@ body {
   font-family: 'Roboto', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f5f5f5;
+  background-color: #f7f9fc;
+  color: #333;
 }
 
 /* AppBar Styling */
 .AppBar {
   background-color: #1976d2;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Button Hover and Transition Effects */
 button {
   transition: all 0.3s ease;
-  border-radius: 4px;
+  border-radius: 6px;
   font-weight: bold;
 }
 
@@ -34,8 +36,8 @@ button:hover {
   transform: translate(-50%, -50%);
   width: 400px;
   background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
   padding: 24px;
   animation: fadeIn 0.3s ease;
 }
@@ -52,24 +54,47 @@ button:hover {
 }
 
 /* Fade-in Animation for Modals */
+/* App.css */
+
+/* Fade-in animation for modal */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
+
+/* Fade-out animation for modal */
+@keyframes fadeOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+/* Apply fade-in when modal opens */
+.modal-open {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* Apply fade-out when modal closes */
+.modal-close {
+  animation: fadeOut 0.3s ease forwards;
+}
+
 
 /* Product List Styles */
 .product-list {
   margin: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
 }
 
 .product-item {
-  display: flex;
-  align-items: center;
-  padding: 10px;
+  width: 200px;
+  padding: 16px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 15px;
+  transition: box-shadow 0.3s ease;
 }
 
 .product-item:hover {
@@ -77,16 +102,43 @@ button:hover {
 }
 
 .product-avatar {
-  margin-right: 15px;
+  margin-bottom: 10px;
 }
 
 .product-info {
-  flex-grow: 1;
+  text-align: center;
 }
 
 .product-price {
   font-weight: bold;
+  color: #1976d2;
+  margin-top: 8px;
 }
+
+/* App.css */
+
+/* Cart Modal Improvements */
+.modal-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+  padding: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-box .MuiTypography-h6 {
+  font-weight: 600;
+}
+
+.modal-box .MuiButton-root {
+  border-radius: 6px;
+}
+
 
 /* Quantity Input Styling */
 .quantity-input {
@@ -95,6 +147,7 @@ button:hover {
   border-radius: 4px;
   text-align: center;
   padding: 4px;
+  border: 1px solid #ddd;
 }
 
 /* Checkout Page Button */

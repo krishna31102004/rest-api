@@ -1,10 +1,22 @@
 // src/components/CartModal.js
-import React from 'react';
-import { Modal, Box, Typography, List, ListItem, ListItemText, Button } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Modal, Box, Typography, List, ListItem, ListItemText, Button, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 
-function CartModal({ open, onClose, cartItems, removeFromCart }) {
+function CartModal({ open, onClose, cartItems, incrementQuantity, decrementQuantity }) {
+    const [animationClass, setAnimationClass] = useState("modal-open");
     const navigate = useNavigate();
+
+    // Handle animation class change based on modal state
+    useEffect(() => {
+        if (open) {
+            setAnimationClass("modal-open");
+        } else {
+            setAnimationClass("modal-close");
+        }
+    }, [open]);
 
     const handleCheckout = () => {
         onClose(); // Close the modal
@@ -15,17 +27,20 @@ function CartModal({ open, onClose, cartItems, removeFromCart }) {
 
     return (
         <Modal open={open} onClose={onClose} aria-labelledby="cart-modal-title">
-            <Box sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: 400,
-                bgcolor: 'background.paper',
-                borderRadius: '8px',
-                boxShadow: 24,
-                p: 4,
-            }}>
+            <Box
+                className={animationClass}
+                sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 400,
+                    bgcolor: 'background.paper',
+                    borderRadius: '8px',
+                    boxShadow: 24,
+                    p: 4,
+                }}
+            >
                 <Typography id="cart-modal-title" variant="h6" component="h2">
                     Cart Summary
                 </Typography>
@@ -34,16 +49,18 @@ function CartModal({ open, onClose, cartItems, removeFromCart }) {
                         cartItems.map((item, index) => (
                             <ListItem key={index}>
                                 <ListItemText
-                                    primary={`${item.name} | Quantity: ${item.quantity}`}
+                                    primary={item.name}
                                     secondary={`Price: $${item.price}`}
                                 />
-                                <Button
-                                    onClick={() => removeFromCart(item._id, 1)}
-                                    variant="outlined"
-                                    color="secondary"
-                                >
-                                    Remove
-                                </Button>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <IconButton onClick={() => decrementQuantity(item._id)}>
+                                        <RemoveIcon />
+                                    </IconButton>
+                                    <Typography>{item.quantity}</Typography>
+                                    <IconButton onClick={() => incrementQuantity(item._id)}>
+                                        <AddIcon />
+                                    </IconButton>
+                                </div>
                             </ListItem>
                         ))
                     ) : (

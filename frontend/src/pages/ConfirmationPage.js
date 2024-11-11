@@ -1,10 +1,15 @@
 // src/pages/ConfirmationPage.js
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function ConfirmationPage() {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        toast.info("Thank you for your purchase!"); // Notification on page load
+    }, []);
 
     const handleBackToStore = () => {
         navigate('/');

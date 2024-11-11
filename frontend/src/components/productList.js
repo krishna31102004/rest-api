@@ -1,20 +1,24 @@
 // src/components/ProductList.js
 import React, { useEffect, useState } from 'react';
-import { List, ListItem, ListItemText, ListItemAvatar, Avatar, Button, Container, TextField } from '@mui/material';
+import { List, ListItem, ListItemText, ListItemAvatar, Avatar, Button, Container, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { getProducts } from '../productService';
 
 function ProductList({ addToCart }) {
     const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [addedToCart, setAddedToCart] = useState({});
     const [quantities, setQuantities] = useState({});
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortOption, setSortOption] = useState('');
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 const data = await getProducts();
                 setProducts(data.products);
+                setFilteredProducts(data.products);
             } catch (error) {
                 console.error('Failed to fetch products:', error);
             } finally {
@@ -24,6 +28,39 @@ function ProductList({ addToCart }) {
 
         fetchProducts();
     }, []);
+
+    // Handle search input change
+    const handleSearchChange = (event) => {
+        const query = event.target.value.toLowerCase();
+        setSearchQuery(query);
+        filterAndSortProducts(query, sortOption);
+    };
+
+    // Handle sorting based on selected option
+    const handleSortChange = (event) => {
+        const sortValue = event.target.value;
+        setSortOption(sortValue);
+        filterAndSortProducts(searchQuery, sortValue);
+    };
+
+    // Filter and sort products based on search query and sort option
+    const filterAndSortProducts = (query, sortValue) => {
+        let updatedProducts = products.filter((product) =>
+            product.name.toLowerCase().includes(query)
+        );
+
+        if (sortValue === 'priceAsc') {
+            updatedProducts.sort((a, b) => a.price - b.price);
+        } else if (sortValue === 'priceDesc') {
+            updatedProducts.sort((a, b) => b.price - a.price);
+        } else if (sortValue === 'nameAsc') {
+            updatedProducts.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortValue === 'nameDesc') {
+            updatedProducts.sort((a, b) => b.name.localeCompare(a.name));
+        }
+
+        setFilteredProducts(updatedProducts);
+    };
 
     const handleAddToCart = (product) => {
         const quantity = quantities[product._id] || 1; // Default to 1 if quantity not set
@@ -54,8 +91,30 @@ function ProductList({ addToCart }) {
 
     return (
         <Container>
+            {/* Search Field */}
+            <TextField
+                label="Search Products"
+                variant="outlined"
+                fullWidth
+                sx={{ mb: 2 }}
+                value={searchQuery}
+                onChange={handleSearchChange}
+            />
+
+            {/* Sorting Dropdown */}
+            <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>Sort By</InputLabel>
+                <Select value={sortOption} onChange={handleSortChange}>
+                    <MenuItem value="priceAsc">Price: Low to High</MenuItem>
+                    <MenuItem value="priceDesc">Price: High to Low</MenuItem>
+                    <MenuItem value="nameAsc">Name: A to Z</MenuItem>
+                    <MenuItem value="nameDesc">Name: Z to A</MenuItem>
+                </Select>
+            </FormControl>
+
+            {/* Product List */}
             <List>
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                     <ListItem key={product._id} divider>
                         <ListItemAvatar>
                             <Avatar

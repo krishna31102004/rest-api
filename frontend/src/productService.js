@@ -1,9 +1,10 @@
-import api from './api'; // import the Axios instance
+// productService.js
+import api from './api.js';
 
 // Function to get all products
 export const getProducts = async () => {
   try {
-    const response = await api.get('/products');
+    const response = await api.get('/products'); // Ensures /products path is appended to base URL
     return response.data;
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -21,5 +22,3 @@ export const addProduct = async (productData) => {
     throw error;
   }
 };
-
-// Add more functions as needed for update, delete, etc.
