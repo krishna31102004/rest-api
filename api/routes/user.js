@@ -13,6 +13,4 @@ router.patch('/profile', checkAuth, UserController.updatePassword); // Update pa
 router.delete('/:userId', checkAuth, UserController.user_delete); // Delete user route (ensure correct usage)
 
 
-
-
 module.exports = router;
