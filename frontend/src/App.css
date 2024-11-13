@@ -54,15 +54,11 @@ button:hover {
 }
 
 /* Fade-in Animation for Modals */
-/* App.css */
-
-/* Fade-in animation for modal */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
 
-/* Fade-out animation for modal */
 @keyframes fadeOut {
   from { opacity: 1; transform: scale(1); }
   to { opacity: 0; transform: scale(0.95); }
@@ -77,7 +73,6 @@ button:hover {
 .modal-close {
   animation: fadeOut 0.3s ease forwards;
 }
-
 
 /* Product List Styles */
 .product-list {
@@ -115,8 +110,6 @@ button:hover {
   margin-top: 8px;
 }
 
-/* App.css */
-
 /* Cart Modal Improvements */
 .modal-box {
   position: absolute;
@@ -139,7 +132,6 @@ button:hover {
   border-radius: 6px;
 }
 
-
 /* Quantity Input Styling */
 .quantity-input {
   width: 60px;
@@ -148,6 +140,21 @@ button:hover {
   text-align: center;
   padding: 4px;
   border: 1px solid #ddd;
+}
+
+/* Pagination Styling */
+.MuiPagination-root {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.MuiPaginationItem-root {
+  color: #1976d2;
+}
+
+.MuiPaginationItem-root:hover {
+  background-color: #e3f2fd;
 }
 
 /* Checkout Page Button */
@@ -165,4 +172,13 @@ button:hover {
 .checkout-button:hover {
   background-color: #1565c0;
   transform: scale(1.05);
+}
+
+/* Product List Container */
+.product-list-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
 }

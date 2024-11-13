@@ -2,6 +2,7 @@ const User = require('../models/user');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const Product = require('../models/product'); // Assuming a product model exists
 
 exports.user_signup = (req, res) => {
     User.find({ email: req.body.email })
@@ -47,7 +48,7 @@ exports.user_signup = (req, res) => {
             error: err
         });
     });
-}
+};
 
 exports.user_login = (req, res) => {
     User.find({ email: req.body.email })
@@ -91,7 +92,7 @@ exports.user_login = (req, res) => {
             error: err
         });
     });
-}
+};
 
 exports.user_delete = (req, res) => {
     User.deleteOne({ _id: req.params.userId })
@@ -107,4 +108,51 @@ exports.user_delete = (req, res) => {
             error: err
         });
     });
-}
+};
+
+// New function to get the profile information
+exports.getProfile = (req, res) => {
+    const userId = req.userData.userId; // Retrieved from the token via checkAuth middleware
+    User.findById(userId)
+    .select('email') // Only select the email field
+    .exec()
+    .then(user => {
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json({ email: user.email });
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({ error: err });
+    });
+};
+
+exports.updatePassword = (req, res) => {
+    const userId = req.userData.userId; // Retrieved from the token via checkAuth middleware
+    const { password } = req.body;
+
+    bcrypt.hash(password, 10, (err, hash) => {
+        if (err) {
+            return res.status(500).json({ error: err });
+        }
+        User.updateOne({ _id: userId }, { $set: { password: hash } })
+            .exec()
+            .then(result => {
+                res.status(200).json({
+                    message: 'Password updated successfully'
+                });
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({ error: err });
+            });
+    });
+};
+
+
+
+
+
+
+

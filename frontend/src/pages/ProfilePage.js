@@ -1,16 +1,14 @@
-// src/pages/ProfilePage.js
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Button } from '@mui/material';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { getProfile, updatePassword } from '../api';
+import api, { getProfile } from '../api';
 
 function ProfilePage() {
     const [email, setEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const navigate = useNavigate();
 
-    // Fetch profile data on component mount
     useEffect(() => {
         const fetchProfile = async () => {
             try {
@@ -18,7 +16,7 @@ function ProfilePage() {
                 setEmail(profile.email);
             } catch (error) {
                 toast.error('Failed to fetch profile information');
-                navigate('/login'); // Redirect to login if unauthenticated
+                navigate('/login');
             }
         };
 
@@ -27,7 +25,7 @@ function ProfilePage() {
 
     const handlePasswordUpdate = async () => {
         try {
-            await updatePassword(newPassword);
+            await api.put('/user/update-password', { password: newPassword });
             toast.success('Password updated successfully');
             setNewPassword('');
         } catch (error) {

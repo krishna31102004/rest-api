@@ -1,29 +1,72 @@
-// productService.js
-import api from './api.js';
 // src/productService.js
+import api from './api';
 
-// Use getProfile and updatePassword directly where needed
-// If these functions aren't needed in productService.js, you can remove the import entirely
-
-
-// Function to get all products
 export const getProducts = async () => {
-  try {
-    const response = await api.get('/products'); // Ensures /products path is appended to base URL
+    try {
+        const response = await api.get('/products');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        throw error;
+    }
+};
+
+export const addProduct = async (productData) => {
+    const response = await api.post('/products', productData, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+    });
     return response.data;
+};
+
+export const getProductById = async (productId) => {
+    try {
+        const response = await api.get(`/products/${productId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching product by ID:', error);
+        throw error;
+    }
+};
+
+// Function to add a product to the wishlist
+export const addToWishlist = async (productId) => {
+    try {
+        const response = await api.post('/user/wishlist', { productId });
+        return response.data;
+    } catch (error) {
+        console.error('Error adding product to wishlist:', error);
+        throw error;
+    }
+};
+
+// Updated function to remove a product from the wishlist
+export const removeFromWishlist = async (productId) => {
+  try {
+      const response = await api({
+          method: 'delete',
+          url: '/user/wishlist',
+          headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          data: { productId }, // Explicitly setting data for delete request
+      });
+      return response.data;
   } catch (error) {
-    console.error('Error fetching products:', error);
-    throw error;
+      console.error('Error removing product from wishlist:', error);
+      throw error;
   }
 };
 
-// Function to add a new product
-export const addProduct = async (productData) => {
-  try {
-    const response = await api.post('/products', productData);
-    return response.data;
-  } catch (error) {
-    console.error('Error adding product:', error);
-    throw error;
-  }
+// Assign the functions to a variable
+const productService = {
+    getProducts,
+    addProduct,
+    getProductById,
+    addToWishlist,
+    removeFromWishlist,
 };
+
+// Export the variable
+export default productService;

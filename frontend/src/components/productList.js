@@ -1,8 +1,24 @@
 // src/components/ProductList.js
-import React, { useEffect, useState } from 'react';
-import { List, ListItem, ListItemText, ListItemAvatar, Avatar, Button, Container, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+    List,
+    ListItem,
+    ListItemText,
+    ListItemAvatar,
+    Avatar,
+    Button,
+    Container,
+    TextField,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Pagination,
+} from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { getProducts } from '../productService';
+import { toast } from 'react-toastify';
+import productService from '../productService';
+import ProductModal from './ProductModal';
 
 function ProductList({ addToCart }) {
     const [products, setProducts] = useState([]);
@@ -12,39 +28,40 @@ function ProductList({ addToCart }) {
     const [quantities, setQuantities] = useState({});
     const [searchQuery, setSearchQuery] = useState('');
     const [sortOption, setSortOption] = useState('');
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+    
+    // Modal state
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalQuantity, setModalQuantity] = useState(1); // Quantity for the modal product
+    
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const productsPerPage = 5;
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const data = await getProducts();
+                const data = await productService.getProducts();
                 setProducts(data.products);
                 setFilteredProducts(data.products);
             } catch (error) {
-                console.error('Failed to fetch products:', error);
+                toast.error('Failed to fetch products. Please try again later.');
             } finally {
                 setLoading(false);
             }
         };
-
         fetchProducts();
     }, []);
 
-    // Handle search input change
-    const handleSearchChange = (event) => {
-        const query = event.target.value.toLowerCase();
-        setSearchQuery(query);
-        filterAndSortProducts(query, sortOption);
-    };
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery);
+        }, 300);
+        return () => clearTimeout(handler);
+    }, [searchQuery]);
 
-    // Handle sorting based on selected option
-    const handleSortChange = (event) => {
-        const sortValue = event.target.value;
-        setSortOption(sortValue);
-        filterAndSortProducts(searchQuery, sortValue);
-    };
-
-    // Filter and sort products based on search query and sort option
-    const filterAndSortProducts = (query, sortValue) => {
+    const filterAndSortProducts = useCallback((query, sortValue) => {
         let updatedProducts = products.filter((product) =>
             product.name.toLowerCase().includes(query)
         );
@@ -60,10 +77,22 @@ function ProductList({ addToCart }) {
         }
 
         setFilteredProducts(updatedProducts);
+    }, [products]);
+
+    useEffect(() => {
+        filterAndSortProducts(debouncedSearchQuery, sortOption);
+    }, [debouncedSearchQuery, sortOption, filterAndSortProducts]);
+
+    const handleSearchChange = (event) => {
+        setSearchQuery(event.target.value.toLowerCase());
+    };
+
+    const handleSortChange = (event) => {
+        setSortOption(event.target.value);
     };
 
     const handleAddToCart = (product) => {
-        const quantity = quantities[product._id] || 1; // Default to 1 if quantity not set
+        const quantity = quantities[product._id] || 1;
         addToCart(product, quantity);
         setAddedToCart((prevState) => ({
             ...prevState,
@@ -85,13 +114,31 @@ function ProductList({ addToCart }) {
         }));
     };
 
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
+    };
+
+    const openModal = (product) => {
+        setSelectedProduct(product);
+        setModalQuantity(quantities[product._id] || 1);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setSelectedProduct(null);
+        setIsModalOpen(false);
+    };
+
     if (loading) {
         return <p>Loading products...</p>;
     }
 
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
     return (
         <Container>
-            {/* Search Field */}
             <TextField
                 label="Search Products"
                 variant="outlined"
@@ -100,8 +147,6 @@ function ProductList({ addToCart }) {
                 value={searchQuery}
                 onChange={handleSearchChange}
             />
-
-            {/* Sorting Dropdown */}
             <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Sort By</InputLabel>
                 <Select value={sortOption} onChange={handleSortChange}>
@@ -112,42 +157,64 @@ function ProductList({ addToCart }) {
                 </Select>
             </FormControl>
 
-            {/* Product List */}
-<List>
-    {filteredProducts.map((product) => (
-        <ListItem key={product._id} divider>
-            <ListItemAvatar>
-                <Avatar
-                    variant="square"
-                    src={product.productImage ? `http://localhost:3000/${product.productImage}` : "https://via.placeholder.com/150"}
-                    alt={product.name}
-                />
-            </ListItemAvatar>
-            <ListItemText
-                primary={product.name}
-                secondary={`Price: ${product.price ? `$${product.price}` : 'N/A'}`}
-            />
-            <TextField
-                type="number"
-                value={quantities[product._id] || 1}
-                onChange={(e) => handleQuantityChange(product._id, e.target.value)}
-                label="Quantity" // Set label to "Quantity"
-                InputProps={{ inputProps: { min: 1 } }}
-                style={{ width: '60px', marginRight: '10px' }}
-            />
-            <Button
-                variant="contained"
-                color="primary"
-                startIcon={<ShoppingCartIcon />}
-                onClick={() => handleAddToCart(product)}
-                disabled={addedToCart[product._id]}
-            >
-                {addedToCart[product._id] ? "Added!" : "Add to Cart"}
-            </Button>
-        </ListItem>
-    ))}
-</List>
+            {currentProducts.length > 0 ? (
+                <List>
+                    {currentProducts.map((product) => (
+                        <ListItem key={product._id} divider button onClick={() => openModal(product)}>
+                            <ListItemAvatar>
+                                <Avatar
+                                    variant="square"
+                                    src={product.productImage ? `http://localhost:3000/${product.productImage}` : "https://via.placeholder.com/150"}
+                                    alt={product.name}
+                                />
+                            </ListItemAvatar>
+                            <ListItemText
+                                primary={product.name}
+                                secondary={`Price: ${product.price ? `$${product.price}` : 'N/A'}`}
+                            />
+                            <TextField
+                                type="number"
+                                value={quantities[product._id] || 1}
+                                onChange={(e) => handleQuantityChange(product._id, e.target.value)}
+                                label="Quantity"
+                                InputProps={{ inputProps: { min: 1 } }}
+                                style={{ width: '60px', marginRight: '10px' }}
+                            />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<ShoppingCartIcon />}
+                                onClick={(e) => {
+                                    e.stopPropagation(); 
+                                    handleAddToCart(product);
+                                }}
+                                disabled={addedToCart[product._id]}
+                            >
+                                {addedToCart[product._id] ? "Added!" : "Add to Cart"}
+                            </Button>
+                        </ListItem>
+                    ))}
+                </List>
+            ) : (
+                <p>No products found matching your search criteria.</p>
+            )}
 
+            <Pagination
+                count={Math.ceil(filteredProducts.length / productsPerPage)}
+                page={currentPage}
+                onChange={handlePageChange}
+                sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
+            />
+
+            {/* Product Modal */}
+            <ProductModal 
+                open={isModalOpen} 
+                onClose={closeModal} 
+                product={selectedProduct} 
+                addToCart={addToCart} 
+                quantity={modalQuantity}
+                setQuantity={setModalQuantity} 
+            />
         </Container>
     );
 }

@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import ProductList from './components/ProductList';
@@ -7,19 +8,12 @@ import ConfirmationPage from './pages/ConfirmationPage';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
+import ProductDetails from './pages/ProductDetails';
 import { AppBar, Toolbar, Typography, IconButton, Badge, Button } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-// Add this inside the <Routes> component
-
-
-
-// Inside the Routes component in App.js
-
-
 
 function App() {
     const [cartItems, setCartItems] = useState(() => {
@@ -29,7 +23,6 @@ function App() {
     const [cartOpen, setCartOpen] = useState(false);
     const [animateCart, setAnimateCart] = useState(false);
 
-    // Save cart items to localStorage on change
     useEffect(() => {
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
     }, [cartItems]);
@@ -96,6 +89,11 @@ function App() {
         setCartOpen(!cartOpen);
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        toast.success("Logged out successfully!");
+    };
+
     const clearCart = () => {
         setCartItems([]);
         localStorage.removeItem('cartItems');
@@ -105,30 +103,33 @@ function App() {
     return (
         <Router>
             <div className="App">
-            <AppBar position="static">
-    <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} align="center">
-            My Store
-        </Typography>
-        <Button color="inherit" component={Link} to="/profile">
-            Profile
-        </Button>
-        <IconButton color="inherit" onClick={toggleCart}>
-            <Badge badgeContent={cartItems.reduce((sum, item) => sum + item.quantity, 0)} color="secondary">
-                <ShoppingCartIcon className={animateCart ? "cart-animated" : ""} />
-            </Badge>
-        </IconButton>
-    </Toolbar>
-</AppBar>
+                <AppBar position="static">
+                    <Toolbar>
+                        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} align="center">
+                            My Store
+                        </Typography>
+                        <Button color="inherit" component={Link} to="/profile">
+                            Profile
+                        </Button>
+                        <Button color="inherit" onClick={handleLogout} component={Link} to="/login">
+                            Logout
+                        </Button>
+                        <IconButton color="inherit" onClick={toggleCart}>
+                            <Badge badgeContent={cartItems.reduce((sum, item) => sum + item.quantity, 0)} color="secondary">
+                                <ShoppingCartIcon className={animateCart ? "cart-animated" : ""} />
+                            </Badge>
+                        </IconButton>
+                    </Toolbar>
+                </AppBar>
 
                 <Routes>
                     <Route path="/" element={<ProductList addToCart={addToCart} />} />
                     <Route path="/checkout" element={<CheckoutPage clearCart={clearCart} />} />
                     <Route path="/confirmation" element={<ConfirmationPage />} />
-<Route path="/signup" element={<SignupPage />} />
-<Route path="/login" element={<LoginPage />} />
-<Route path="/profile" element={<ProfilePage />} />
-
+                    <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/products/:productId" element={<ProductDetails />} />
                 </Routes>
 
                 <CartModal 
